@@ -1,11 +1,6 @@
 ﻿using eCommerce_SpecflowNetCore.Hooks;
 using OpenQA.Selenium;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using TechTalk.SpecFlow;
+
 
 namespace eCommerce_SpecflowNetCore.Pages
 {
@@ -27,26 +22,22 @@ namespace eCommerce_SpecflowNetCore.Pages
         public void SetUserName(string username)
         {
             txtEmail.Clear();
-            Thread.Sleep(2000);
             txtEmail.SendKeys(username);
         }
         public void SetPassword(string pwd)
         {
             txtPassword.Clear();
-            Thread.Sleep(2000);
             txtPassword.SendKeys(pwd);
         }
 
         public void ClickLogin()
         {
             LoginBtn.Click();
-            Thread.Sleep(2000);
         }
 
         public void ClickLogout()
         {
             lnkLogout.Click();
-            Thread.Sleep(2000);
 
         }
     }

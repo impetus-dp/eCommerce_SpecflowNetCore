@@ -27,14 +27,10 @@ namespace eCommerce_SpecflowNetCore.Hooks
         [BeforeScenario]
         public void BeforeScenario()
         {
-            //driver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
             driver = new ChromeDriver();
             driver.Manage().Window.Maximize();
           
             scenario = featureName.CreateNode<Scenario>(ScenarioContext.Current.ScenarioInfo.Title);
-
-
-            //TODO: implement logic that has to run before executing each scenario
         }
 
         [AfterScenario]
@@ -49,11 +45,7 @@ namespace eCommerce_SpecflowNetCore.Hooks
             extent = new AventStack.ExtentReports.ExtentReports();
             htmlreport.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Dark;
             extent.AttachReporter(htmlreport);
-            /* extent = new AventStack.ExtentReports.ExtentReports();
-             var htmlReporter = new ExtentHtmlReporter(@"F:\VStudioC#\dpayarda\GoodWorkingCopies\SpecFlowBddPomExtent16Sep_V1\SpecFlowDan16Sep\ExtentReports\index.html");
-             htmlReporter.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Dark;
-             extent.AttachReporter(htmlReporter);*/
-
+            
         }
         [AfterTestRun]
         public static void TearDownReport()
@@ -81,7 +73,6 @@ namespace eCommerce_SpecflowNetCore.Hooks
             string Screenshot = Ss.AsBase64EncodedString;
             try
             {
-                //Steps with out errors
                 if (ScenarioContext.Current.TestError == null)
                 {
                     if (stepType == "Given")
@@ -96,27 +87,22 @@ namespace eCommerce_SpecflowNetCore.Hooks
                 //Steps failed or with errors
                 else if (ScenarioContext.Current.TestError != null)
                 {
-                    /* ITakesScreenshot ts = driver as ITakesScreenshot;
-                     Screenshot screenshot = ts.GetScreenshot();*/
+                    
                     if (stepType == "Given")
                     {
                         scenario.CreateNode<Given>(ScenarioStepContext.Current.StepInfo.Text).Fail(ScenarioContext.Current.TestError.Message, MediaEntityBuilder.CreateScreenCaptureFromBase64String(Screenshot).Build());
-                        //screenshot.SaveAsFile("F:\\VStudioC#\\dpayarda\\GoodWorkingCopies\\SpecFlowBddPomExtent16Sep_V1\\SpecFlowDan16Sep\\Screenshots\\s18.jpeg", ScreenshotImageFormat.Jpeg);
                     }
                     else if (stepType == "When")
                     {
                         scenario.CreateNode<When>(ScenarioStepContext.Current.StepInfo.Text).Fail(ScenarioContext.Current.TestError.Message, MediaEntityBuilder.CreateScreenCaptureFromBase64String(Screenshot).Build());
-                        //screenshot.SaveAsFile("F:\\VStudioC#\\dpayarda\\GoodWorkingCopies\\SpecFlowBddPomExtent16Sep_V1\\SpecFlowDan16Sep\\Screenshots\\s18.jpeg", ScreenshotImageFormat.Jpeg);
                     }
                     else if (stepType == "Then")
                     {
                         scenario.CreateNode<Then>(ScenarioStepContext.Current.StepInfo.Text).Fail(ScenarioContext.Current.TestError.Message, MediaEntityBuilder.CreateScreenCaptureFromBase64String(Screenshot).Build());
-                        //screenshot.SaveAsFile("F:\\VStudioC#\\dpayarda\\GoodWorkingCopies\\SpecFlowBddPomExtent16Sep_V1\\SpecFlowDan16Sep\\Screenshots\\s18.jpeg", ScreenshotImageFormat.Jpeg);
                     }
                     else if (stepType == "And")
                     {
                         scenario.CreateNode<And>(ScenarioStepContext.Current.StepInfo.Text).Fail(ScenarioContext.Current.TestError.Message, MediaEntityBuilder.CreateScreenCaptureFromBase64String(Screenshot).Build());
-                        //screenshot.SaveAsFile("F:\\VStudioC#\\dpayarda\\GoodWorkingCopies\\SpecFlowBddPomExtent16Sep_V1\\SpecFlowDan16Sep\\Screenshots\\s18.jpeg", ScreenshotImageFormat.Jpeg);
                     }
 
                 }
@@ -145,10 +131,6 @@ namespace eCommerce_SpecflowNetCore.Hooks
                 step.Log(Status.Fail, MediaEntityBuilder.CreateScreenCaptureFromBase64String(Screenshot).Build());
 
             }
-
-
-
-
 
         }
     }
