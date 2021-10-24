@@ -1,0 +1,155 @@
+﻿using AventStack.ExtentReports;
+using AventStack.ExtentReports.Gherkin.Model;
+using AventStack.ExtentReports.Reporter;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using TechTalk.SpecFlow;
+
+namespace eCommerce_SpecflowNetCore.Hooks
+{
+    [Binding]
+    public class WebHook
+    {
+        public static IWebDriver driver;
+        private static ExtentTest featureName;
+        private static ExtentTest scenario, step;
+        private static ExtentReports extent;
+
+        static string reportpath = System.IO.Directory.GetParent(@"../../../").FullName
+            + Path.DirectorySeparatorChar + "Result"
+            + Path.DirectorySeparatorChar + "Result_" + DateTime.Now.ToString("ddMMyyy HHmmss");
+
+        [BeforeScenario]
+        public void BeforeScenario()
+        {
+            //driver = new ChromeDriver(AppDomain.CurrentDomain.BaseDirectory);
+            driver = new ChromeDriver();
+            driver.Manage().Window.Maximize();
+          
+            scenario = featureName.CreateNode<Scenario>(ScenarioContext.Current.ScenarioInfo.Title);
+
+
+            //TODO: implement logic that has to run before executing each scenario
+        }
+
+        [AfterScenario]
+        public void AfterScenario()
+        {
+            driver.Quit();
+        }
+        [BeforeTestRun]
+        public static void IntialiseReport()
+        {
+            AventStack.ExtentReports.Reporter.ExtentHtmlReporter htmlreport = new ExtentHtmlReporter(reportpath);
+            extent = new AventStack.ExtentReports.ExtentReports();
+            htmlreport.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Dark;
+            extent.AttachReporter(htmlreport);
+            /* extent = new AventStack.ExtentReports.ExtentReports();
+             var htmlReporter = new ExtentHtmlReporter(@"F:\VStudioC#\dpayarda\GoodWorkingCopies\SpecFlowBddPomExtent16Sep_V1\SpecFlowDan16Sep\ExtentReports\index.html");
+             htmlReporter.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Dark;
+             extent.AttachReporter(htmlReporter);*/
+
+        }
+        [AfterTestRun]
+        public static void TearDownReport()
+        {
+            extent.Flush();
+            driver.Quit();
+
+        }
+        [BeforeStep]
+        public void BeforeStep()
+        {
+            step = scenario;
+        }
+        [BeforeFeature]
+        public static void BeforeFeature()
+        {
+            featureName = extent.CreateTest<Feature>(FeatureContext.Current.FeatureInfo.Title);
+        }
+
+        [AfterStep]
+        public void InsertReportingSteps()
+        {
+            var stepType = ScenarioStepContext.Current.StepInfo.StepDefinitionType.ToString();
+            Screenshot Ss = ((ITakesScreenshot)driver).GetScreenshot();
+            string Screenshot = Ss.AsBase64EncodedString;
+            try
+            {
+                //Steps with out errors
+                if (ScenarioContext.Current.TestError == null)
+                {
+                    if (stepType == "Given")
+                        scenario.CreateNode<Given>(ScenarioStepContext.Current.StepInfo.Text).Pass(ScenarioStepContext.Current.StepInfo.Text);
+                    else if (stepType == "When")
+                        scenario.CreateNode<When>(ScenarioStepContext.Current.StepInfo.Text).Pass(ScenarioStepContext.Current.StepInfo.Text);
+                    else if (stepType == "Then")
+                        scenario.CreateNode<Then>(ScenarioStepContext.Current.StepInfo.Text).Pass(ScenarioStepContext.Current.StepInfo.Text);
+                    else if (stepType == "And")
+                        scenario.CreateNode<And>(ScenarioStepContext.Current.StepInfo.Text).Pass(ScenarioStepContext.Current.StepInfo.Text);
+                }
+                //Steps failed or with errors
+                else if (ScenarioContext.Current.TestError != null)
+                {
+                    /* ITakesScreenshot ts = driver as ITakesScreenshot;
+                     Screenshot screenshot = ts.GetScreenshot();*/
+                    if (stepType == "Given")
+                    {
+                        scenario.CreateNode<Given>(ScenarioStepContext.Current.StepInfo.Text).Fail(ScenarioContext.Current.TestError.Message, MediaEntityBuilder.CreateScreenCaptureFromBase64String(Screenshot).Build());
+                        //screenshot.SaveAsFile("F:\\VStudioC#\\dpayarda\\GoodWorkingCopies\\SpecFlowBddPomExtent16Sep_V1\\SpecFlowDan16Sep\\Screenshots\\s18.jpeg", ScreenshotImageFormat.Jpeg);
+                    }
+                    else if (stepType == "When")
+                    {
+                        scenario.CreateNode<When>(ScenarioStepContext.Current.StepInfo.Text).Fail(ScenarioContext.Current.TestError.Message, MediaEntityBuilder.CreateScreenCaptureFromBase64String(Screenshot).Build());
+                        //screenshot.SaveAsFile("F:\\VStudioC#\\dpayarda\\GoodWorkingCopies\\SpecFlowBddPomExtent16Sep_V1\\SpecFlowDan16Sep\\Screenshots\\s18.jpeg", ScreenshotImageFormat.Jpeg);
+                    }
+                    else if (stepType == "Then")
+                    {
+                        scenario.CreateNode<Then>(ScenarioStepContext.Current.StepInfo.Text).Fail(ScenarioContext.Current.TestError.Message, MediaEntityBuilder.CreateScreenCaptureFromBase64String(Screenshot).Build());
+                        //screenshot.SaveAsFile("F:\\VStudioC#\\dpayarda\\GoodWorkingCopies\\SpecFlowBddPomExtent16Sep_V1\\SpecFlowDan16Sep\\Screenshots\\s18.jpeg", ScreenshotImageFormat.Jpeg);
+                    }
+                    else if (stepType == "And")
+                    {
+                        scenario.CreateNode<And>(ScenarioStepContext.Current.StepInfo.Text).Fail(ScenarioContext.Current.TestError.Message, MediaEntityBuilder.CreateScreenCaptureFromBase64String(Screenshot).Build());
+                        //screenshot.SaveAsFile("F:\\VStudioC#\\dpayarda\\GoodWorkingCopies\\SpecFlowBddPomExtent16Sep_V1\\SpecFlowDan16Sep\\Screenshots\\s18.jpeg", ScreenshotImageFormat.Jpeg);
+                    }
+
+                }
+                else if (ScenarioContext.Current.ScenarioExecutionStatus.ToString() == "StepDefinitionPending")
+                {
+                    if (stepType == "Given")
+                        scenario.CreateNode<Given>(ScenarioStepContext.Current.StepInfo.Text).Skip("StepDefinitionPending");
+
+                    else if (stepType == "When")
+                        scenario.CreateNode<When>(ScenarioStepContext.Current.StepInfo.Text).Skip("StepDefinitionPending");
+
+                    else if (stepType == "Then")
+                        scenario.CreateNode<Then>(ScenarioStepContext.Current.StepInfo.Text).Skip("StepDefinitionPending");
+
+                    else if (stepType == "And")
+                        scenario.CreateNode<And>(ScenarioStepContext.Current.StepInfo.Text).Skip("StepDefinitionPending");
+                }
+            }
+
+            catch (Exception e)
+            {
+                ITakesScreenshot ts = driver as ITakesScreenshot;
+                Screenshot screenshot = ts.GetScreenshot();
+                screenshot.SaveAsFile("F:\\VStudioC#\\dpayarda\\GoodWorkingCopies\\SpecFlowBddPomExtent18Sep_V1\\SpecFlowDan16Sep\\Screenshots\\Oct23.jpeg", ScreenshotImageFormat.Png);
+                step.Log(Status.Info, e.ToString());
+                step.Log(Status.Fail, MediaEntityBuilder.CreateScreenCaptureFromBase64String(Screenshot).Build());
+
+            }
+
+
+
+
+
+        }
+    }
+}
